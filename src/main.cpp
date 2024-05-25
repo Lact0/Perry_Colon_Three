@@ -4,18 +4,33 @@
 
 #include "chess.hpp"
 #include "polyglotReader.h"
+#include "engine.h"
 
 
 PolyglotReader bookReader{"Titans.bin"};
 
 int main() {
 
-    chess::Board board{"rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2"};
+    Engine engine{};
 
-    chess::Movelist moves{};
-    bookReader.getMoves(moves, board);
-    for(const chess::Move& move: moves) {
-        std::cout << chess::uci::moveToSan(board, move) << " " << move.score() << "\n";
-    }   
+    engine.think(5);
+
+    std::cout << chess::uci::moveToSan(engine.getBoard(), engine.getBestMove());
+
+    // chess::Board board{};
+
+    // while(true) {
+    //     chess::Movelist moves{};
+    //     bookReader.getMoves(moves, board);
+
+    //     if(moves.size() == 0) {
+    //         std::cout << "FINISHED.";
+    //         break;
+    //     }
+
+    //     chess::Move& move = moves[0];
+    //     std::cout << chess::uci::moveToSan(board, move) << "\n";
+    //     board.makeMove(move); 
+    // }
 
 }

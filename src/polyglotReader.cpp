@@ -258,14 +258,14 @@ void PolyglotReader::getMoves(chess::Movelist& moves, const chess::Board& board)
                             + std::string(1, toRank);
 
 
-        std::cout << "PARSING MOVE: " << uciMove;
+        // std::cout << "PARSING MOVE: " << uciMove;
         chess::Move move = chess::uci::uciToMove(board, uciMove);
         std::string sanMove = chess::uci::moveToSan(board, move);
 
         move.setScore(_fileData[i].weight);
         moves.add(move);
 
-        std::cout << "ENTRY FOUND AT: " << i << ", MOVE: " << sanMove << "\n";
+        // std::cout << "ENTRY FOUND AT: " << i << ", MOVE: " << sanMove << "\n";
     }
 
     std::sort(moves.begin(), moves.end(), [](const chess::Move& a, const chess::Move& b) -> bool {

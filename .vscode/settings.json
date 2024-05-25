@@ -5,5 +5,8 @@
             "binaryPath": "c:\\Users\\peter\\Documents\\Programming\\C++\\Perry_Colon_Three\\main",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "iostream": "cpp"
+    }
 }
