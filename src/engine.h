@@ -7,6 +7,10 @@
 class Engine {
 public:
 
+    struct Parameters {
+        int pieceValues[7] {100, 320, 330, 500, 900, 20000, 0};
+    };
+
     Engine()
         : _board{}
         , _bestMove{}
@@ -18,6 +22,8 @@ public:
     {}
 
     void setBoard(chess::Board board);
+    
+    int getEval() {return _eval;}
     chess::Board getBoard() {return _board;}
     chess::Move getBestMove() {return _bestMove;}
 
@@ -33,6 +39,8 @@ private:
     int _eval{0};
     chess::Board _board{};
     chess::Move _bestMove{};
+
+    Parameters _params{};
 
     int negamax(int ply);
     int staticEval();

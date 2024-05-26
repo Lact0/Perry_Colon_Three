@@ -2,6 +2,7 @@
 
 void Engine::setBoard(chess::Board board) {
     _board = board;
+    _eval = staticEval();
     _bestMove = chess::Move();
 }
 
@@ -18,20 +19,23 @@ void Engine::think(int maxPly) {
     for(int ply{0}; ply < maxPly; ++ply) {
 
         int bestEval{_nInf};
+        chess::Move bestMove{};
 
         for(const chess::Move& move: moves) {
             
             _board.makeMove(move);
-            int curEval{negamax(ply)};
+            int curEval{-negamax(ply)};
             _board.unmakeMove(move);
 
             if(curEval > bestEval) {
                 bestEval = curEval;
-                _eval = curEval;
-                _bestMove = move;
+                bestMove = move;
             }
 
         }
+
+        _eval = bestEval;
+        _bestMove = bestMove;
 
     }
 
@@ -39,11 +43,14 @@ void Engine::think(int maxPly) {
 
 int Engine::negamax(int ply) {
 
-    int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
-    if(ply == 0) return staticEval() * sideToMove;
-
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
+
+    if(moves.empty() && _board.inCheck()) return _nInf;
+    if(moves.empty() && !_board.inCheck()) return 0;
+
+    int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
+    if(ply == 0) return staticEval() * sideToMove;
     
     int bestEval{_nInf};
 
@@ -61,5 +68,23 @@ int Engine::negamax(int ply) {
 }
 
 int Engine::staticEval() {
-    return 0;
+    int eval{0};
+
+    chess::PieceType piecesToScore[5] {
+        chess::PieceType::PAWN,
+        chess::PieceType::ROOK,
+        chess::PieceType::KNIGHT,
+        chess::PieceType::BISHOP,
+        chess::PieceType::QUEEN
+    };
+
+    for(chess::PieceType piece: piecesToScore) {
+        chess::Bitboard whitePieces = _board.pieces(piece, chess::Color::WHITE);
+        chess::Bitboard blackPieces = _board.pieces(piece, chess::Color::BLACK);
+        int pieceValue{_params.pieceValues[static_cast<int>(piece)]};
+        
+        eval += (whitePieces.count() - blackPieces.count()) * pieceValue;
+    }
+
+    return eval;
 }
