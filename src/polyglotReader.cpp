@@ -1,5 +1,6 @@
 #include "polyglotReader.h"
 
+//Array containing necessary hash flags
 constexpr uint64_t RANDOM_ARRAY[781] = {
         0x9D39247E33776D41, 0x2AF7398005AAA5C7, 0x44DB015024623547, 0x9C15F73E62A76AE2, 0x75834465489C0C89,
         0x3290AC3A203001BF, 0x0FBBAD1F61042279, 0xE83A908FF2FB60CA, 0x0D7E765D58755C10, 0x1A083822CEAFE02D,
@@ -160,9 +161,17 @@ constexpr uint64_t RANDOM_ARRAY[781] = {
         0xF8D626AAAF278509
 };
 
+
+/*
+Polyglot zobrist hash differs from default zobrist,
+only including the en passant flag when en passant is
+a legal move.
+*/
+
 uint64_t PolyglotReader::getPolyglotHash(const chess::Board& board) {
     std::string_view fen{board.getFen()};
 
+    //Find if the previous move was a double pawn push 
     int spaceCounter{0};
     bool epPossible{false};
     chess::Square epSquare{};
@@ -180,10 +189,12 @@ uint64_t PolyglotReader::getPolyglotHash(const chess::Board& board) {
         }
     }
 
+    //If no double pawn push, no possible hash difference
     if(!epPossible) {
         return board.hash();
     }
 
+    //Check if en passant is a legal move
     chess::Movelist moves;
     chess::movegen::legalmoves(moves, board);
 
@@ -191,15 +202,18 @@ uint64_t PolyglotReader::getPolyglotHash(const chess::Board& board) {
         if(move.typeOf() == chess::Move::ENPASSANT) return board.hash();
     }
 
+    //XOR the flag difference when en passant is not a legal move
     return board.hash() ^ RANDOM_ARRAY[772 + epSquare.file()];
 }
 
 int PolyglotReader::calcNumEntries() {
     std::fstream fileReader{_fileName, std::ios::binary | std::ios::in};
 
+    //Each entry is 16 bytes
     fileReader.seekg(0, std::ios::end);
     int ret = fileReader.tellg() / 16;
     fileReader.close();
+
     return ret;
 }
 
@@ -209,9 +223,12 @@ PolyglotReader::PolyglotEntry* PolyglotReader::readDataFromFile() {
     PolyglotEntry* data = new PolyglotEntry[_numEntries];
 
     for(int i = 0; i < _numEntries; i++) {
+
+        //Each raw entry is 16 bytes
         char rawEntry[16]{};
         fileReader.read(rawEntry, 16);
 
+        //Cast and combine bytes to correct data
         data[i].key    = (static_cast<uint64_t>(static_cast<uint8_t>(rawEntry[0])) << 56)
                        | (static_cast<uint64_t>(static_cast<uint8_t>(rawEntry[1])) << 48)
                        | (static_cast<uint64_t>(static_cast<uint8_t>(rawEntry[2])) << 40)
@@ -242,11 +259,13 @@ PolyglotReader::PolyglotEntry* PolyglotReader::readDataFromFile() {
 void PolyglotReader::getMoves(chess::Movelist& moves, const chess::Board& board) {
     uint64_t targetHash = getPolyglotHash(board);
 
+    //Linear search for target hash
     for(int i = 0; i < _numEntries; i++) {
         if(targetHash != _fileData[i].key) continue;
 
         uint16_t rawMove = _fileData[i].move;
 
+        //Extract uci move string from int
         char toFile = (rawMove & 7) + 97;
         char toRank = ((rawMove >> 3) & 7) + 49;
         char fromFile = ((rawMove >> 6) & 7) + 97;
@@ -258,14 +277,11 @@ void PolyglotReader::getMoves(chess::Movelist& moves, const chess::Board& board)
                             + std::string(1, toRank);
 
 
-        // std::cout << "PARSING MOVE: " << uciMove;
+        //Create and append move object with correct weight
         chess::Move move = chess::uci::uciToMove(board, uciMove);
-        std::string sanMove = chess::uci::moveToSan(board, move);
-
         move.setScore(_fileData[i].weight);
         moves.add(move);
 
-        // std::cout << "ENTRY FOUND AT: " << i << ", MOVE: " << sanMove << "\n";
     }
 
     std::sort(moves.begin(), moves.end(), [](const chess::Move& a, const chess::Move& b) -> bool {

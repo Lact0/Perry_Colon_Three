@@ -3,6 +3,18 @@
 #include "chess.hpp"
 #include <fstream>
 
+/*
+TO USE:
+
+    Instantiate an object with .bin file name
+    Call .getMoves() with:
+        Moves - movelist out parameter
+        Board - current board state
+
+
+*/
+
+
 class PolyglotReader {
 public:
 
@@ -23,11 +35,9 @@ public:
         delete[] _fileData;
     }
 
-    void getMoves(chess::Movelist& moves, const chess::Board& board);
     int getNumEntries() {return _numEntries;}
 
-    static uint64_t getPolyglotHash(const chess::Board& board);
-
+    void getMoves(chess::Movelist& moves, const chess::Board& board);
 
 private:
 
@@ -39,5 +49,6 @@ private:
 
     int calcNumEntries();
     PolyglotEntry* readDataFromFile();
+    static uint64_t getPolyglotHash(const chess::Board& board);
 
 };
