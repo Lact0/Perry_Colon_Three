@@ -1,6 +1,14 @@
+CC = g++
+FIL = engine.o polyglotReader.o
 
+main.exe: main.o ${FIL}
+	${CC} -o main main.o ${FIL} ${GoodPractice}
 
-GoodPractice = -pedantic-errors
+main.o: src/main.cpp
+	${CC} -c $<
 
-all:
-	g++ src/main.cpp src/polyglotReader.cpp src/engine.cpp -o main ${GoodPractice}
+%.o: src/%.cpp src/%.h
+	${CC} -c $<
+
+clean:
+	del *.o

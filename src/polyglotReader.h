@@ -25,7 +25,7 @@ public:
         uint32_t learn{};
     };
 
-    PolyglotReader(const std::string& fileName)
+    PolyglotReader(std::string_view fileName)
         : _numEntries{calcNumEntries()}
         , _fileName{fileName}
         , _fileData{readDataFromFile()}

@@ -2,8 +2,13 @@
 
 void Engine::setBoard(chess::Board board) {
     _board = board;
-    _eval = staticEval();
     _bestMove = chess::Move();
+    _eval = staticEval();
+}
+
+void Engine::useOpeningBook(std::string_view fileName) {
+    _useOpeningBook = true;
+    _openingBook.emplace(fileName);
 }
 
 void Engine::makeMove(const chess::Move& move) {
@@ -13,8 +18,14 @@ void Engine::makeMove(const chess::Move& move) {
 
 void Engine::think(int maxPly) {
 
+    //Gen moves
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
+
+    //Look up book moves
+    chess::Movelist bookMoves{};
+    if(_useOpeningBook) getBookMoves(bookMoves);
+    bool bookMoveExists{bookMoves.size() > 0};
 
     for(int ply{0}; ply < maxPly; ++ply) {
 
@@ -38,6 +49,9 @@ void Engine::think(int maxPly) {
         _bestMove = bestMove;
 
     }
+
+    //Bookmove trumps search
+    if(bookMoveExists) _bestMove = bookMoves[0];
 
 }
 
@@ -81,7 +95,7 @@ int Engine::staticEval() {
     for(chess::PieceType piece: piecesToScore) {
         chess::Bitboard whitePieces = _board.pieces(piece, chess::Color::WHITE);
         chess::Bitboard blackPieces = _board.pieces(piece, chess::Color::BLACK);
-        int pieceValue{_params.pieceValues[static_cast<int>(piece)]};
+        int pieceValue{_pieceValues[static_cast<int>(piece)]};
         
         eval += (whitePieces.count() - blackPieces.count()) * pieceValue;
     }
