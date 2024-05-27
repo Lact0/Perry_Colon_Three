@@ -9,7 +9,7 @@
 int main() {
 
     Engine engine{};
-    //engine.useOpeningBook("Titans.bin");
+    engine.useOpeningBook("Titans.bin");
     engine.setVerbose(true);
 
     while(engine.getBoard().isGameOver().second == chess::GameResult::NONE) {

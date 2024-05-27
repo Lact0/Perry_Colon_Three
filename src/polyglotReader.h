@@ -41,7 +41,9 @@ public:
 
 private:
 
-    const std::string promotions[5] = {"", "k", "b", "r", "q"};
+    const char _promotions[5] = {'\0', 'k', 'b', 'r', 'q'};
+    const std::string _castleMoves[4] = {"e1h1", "e1a1", "e8h8", "e8a8"};
+    const std::string _correctCastleMoves[4] = {"e1g1", "e1c1", "e8g8", "e8c8"};
 
     std::string _fileName{};
     int _numEntries{};

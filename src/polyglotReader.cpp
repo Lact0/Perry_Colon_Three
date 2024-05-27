@@ -255,7 +255,6 @@ PolyglotReader::PolyglotEntry* PolyglotReader::readDataFromFile() {
     return data;
 }
 
-//TODO: PROMOTION AND CASTLING
 void PolyglotReader::getMoves(chess::Movelist& moves, const chess::Board& board) {
     uint64_t targetHash = getPolyglotHash(board);
 
@@ -265,17 +264,33 @@ void PolyglotReader::getMoves(chess::Movelist& moves, const chess::Board& board)
 
         uint16_t rawMove = _fileData[i].move;
 
+        //Ignore null moves
+        if(rawMove == 0) continue;
+
         //Extract uci move string from int
         char toFile = (rawMove & 7) + 97;
         char toRank = ((rawMove >> 3) & 7) + 49;
         char fromFile = ((rawMove >> 6) & 7) + 97;
         char fromRank = ((rawMove >> 9) & 7) + 49;
+        int promotionPiece = (rawMove >> 12) & 7;
 
-        std::string uciMove = std::string(1, fromFile)
-                            + std::string(1, fromRank)
+        //Needed for castling check
+        std::string fromSquare = std::string(1, fromFile) 
+                               + std::string(1, fromRank);
+
+        //Concat move to uci
+        std::string uciMove = fromSquare
                             + std::string(1, toFile)
                             + std::string(1, toRank);
+        if(promotionPiece != 0) uciMove += _promotions[promotionPiece];
 
+
+        //Check for castle
+        std::string kingSquare = board.kingSq(board.sideToMove());
+        for(int i = 0; i < 4; i++) {
+            if(_castleMoves[i] == uciMove && kingSquare == fromSquare) 
+                uciMove = _correctCastleMoves[i];
+        }
 
         //Create and append move object with correct weight
         chess::Move move = chess::uci::uciToMove(board, uciMove);

@@ -28,6 +28,11 @@ void Engine::think(int maxPly) {
     if(_useOpeningBook) getBookMoves(bookMoves);
     bool bookMoveExists{bookMoves.size() > 0};
 
+    if(bookMoveExists) {
+        _bestMove = bookMoves[0];
+        return;
+    }
+
     //Iterative Deepening
     for(int ply{0}; ply < maxPly; ++ply) {
 
