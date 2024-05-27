@@ -37,7 +37,6 @@ void Engine::think(int maxPly) {
         //Search through each move
         for(const chess::Move& move: moves) {
             
-            
             _board.makeMove(move);
             int curEval{-negamax(ply, _nInf, -bestEval)};
             _board.unmakeMove(move);
@@ -103,7 +102,12 @@ int Engine::staticEval() {
         chess::Bitboard blackPieces = _board.pieces(piece, chess::Color::BLACK);
         int pieceValue{_pieceValues[static_cast<int>(piece)]};
         
-        eval += (whitePieces.count() - blackPieces.count()) * pieceValue;
+        while(!whitePieces.empty()) {
+            eval += pieceValue + _pieceSquareTable[piece][whitePieces.pop()];
+        }
+        while(!blackPieces.empty()) {
+            eval -= pieceValue + _pieceSquareTable[piece][63 - blackPieces.pop()];
+        }
     }
 
     return eval;
