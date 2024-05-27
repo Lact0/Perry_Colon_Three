@@ -21,7 +21,6 @@ public:
     chess::Move getBestMove() {return _bestMove;}
 
     void useOpeningBook(std::string_view fileName);
-    void setVerbose(bool verbose) {_verbose = verbose;}
 
     void makeMove(const chess::Move& move);
     void think(int maxPly);
@@ -99,7 +98,6 @@ private:
     //PARAMETERS
     int _pieceValues[5] {100, 320, 330, 500, 900};
     bool _useOpeningBook{false};
-    bool _verbose{false};
 
     //VARIABLE MEMBERS
     chess::Board _board{};

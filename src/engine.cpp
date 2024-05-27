@@ -36,8 +36,7 @@ void Engine::think(int maxPly) {
     //Iterative Deepening
     for(int ply{0}; ply < maxPly; ++ply) {
 
-        if(_verbose) std::cout << "Searching ply " << ply + 1 << ": ";
-
+        //Best eval must be worse than checkmate
         int bestEval{_nInf - 1};
         chess::Move bestMove{};
 
@@ -45,7 +44,7 @@ void Engine::think(int maxPly) {
         for(const chess::Move& move: moves) {
             
             _board.makeMove(move);
-            int curEval{-negamax(ply, _nInf, -bestEval)};
+            int curEval{-negamax(ply, _nInf - 1, -bestEval)};
             _board.unmakeMove(move);
 
             if(curEval > bestEval) {
@@ -57,9 +56,6 @@ void Engine::think(int maxPly) {
 
         _eval = bestEval;
         _bestMove = bestMove;
-
-        if(_verbose) 
-            std::cout << "Eval: " << _eval << " Best Move: " << chess::uci::moveToSan(_board, _bestMove) << "\n";
 
     }
 
@@ -81,6 +77,7 @@ int Engine::negamax(int ply, int alpha, int beta) {
     
     int bestEval{_nInf};
 
+    //Main loop
     for(const chess::Move& move: moves) {
         
         //Get eval of move
