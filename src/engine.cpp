@@ -14,6 +14,7 @@ void Engine::useOpeningBook(std::string_view fileName) {
 void Engine::makeMove(const chess::Move& move) {
     _board.makeMove(move);
     _bestMove = chess::Move();
+    _eval = staticEval();
 }
 
 void Engine::think(int maxPly) {
@@ -27,15 +28,18 @@ void Engine::think(int maxPly) {
     if(_useOpeningBook) getBookMoves(bookMoves);
     bool bookMoveExists{bookMoves.size() > 0};
 
+    //Iterative Deepening
     for(int ply{0}; ply < maxPly; ++ply) {
 
         int bestEval{_nInf};
         chess::Move bestMove{};
 
+        //Search through each move
         for(const chess::Move& move: moves) {
             
+            
             _board.makeMove(move);
-            int curEval{-negamax(ply)};
+            int curEval{-negamax(ply, _nInf, -bestEval)};
             _board.unmakeMove(move);
 
             if(curEval > bestEval) {
@@ -55,7 +59,7 @@ void Engine::think(int maxPly) {
 
 }
 
-int Engine::negamax(int ply) {
+int Engine::negamax(int ply, int alpha, int beta) {
 
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
@@ -71,11 +75,13 @@ int Engine::negamax(int ply) {
     for(const chess::Move& move: moves) {
         
         _board.makeMove(move);
-        int curEval{-negamax(ply - 1)};
+        int curEval{-negamax(ply - 1, -beta, -alpha)};
         _board.unmakeMove(move);
 
+        if(curEval > alpha) alpha = curEval;
         if(curEval > bestEval) bestEval = curEval;
 
+        if(alpha >= beta) break;
     }
 
     return bestEval;

@@ -42,7 +42,7 @@ private:
 
     std::optional<PolyglotReader> _openingBook{std::nullopt};
 
-    int negamax(int ply);
+    int negamax(int ply, int alpha, int beta);
     int staticEval();
     inline void getBookMoves(chess::Movelist& moves) {_openingBook.value().getMoves(moves, _board);}
 
