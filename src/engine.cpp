@@ -155,9 +155,9 @@ void Engine::logStatsToFile() {
     std::string duration = std::to_string(_stats.time / 1000) + "." + std::to_string(_stats.time % 1000);
     
     logFile << "FEN:" << _board.getFen() << "\n";
+    logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" << _eval << "\n";
     logFile << "\tTIME:" << duration << " DEPTH:" << _stats.depthSearched << "\n";
     logFile << "\tNODES:" << _stats.nodesSearched << " Cutoffs:" << _stats.numCutoffs << "\n";
-    logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) << "\n";
 
     logFile << "\n";
     logFile.close();
