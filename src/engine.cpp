@@ -11,10 +11,10 @@ void Engine::useOpeningBook(std::string_view fileName) {
     _openingBook.emplace(fileName);
 }
 
-void Engine::collectStats(bool collectStats) {
-    _collectStats = true;
+void Engine::logStats(std::string_view logFileName) {
+    _logStats = true;
+    _logFileName = logFileName;
 }
-
 
 void Engine::makeMove(const chess::Move& move) {
     _board.makeMove(move);
@@ -74,8 +74,10 @@ void Engine::think(int maxPly) {
 
     if(_collectStats) {
         time end = std::chrono::high_resolution_clock::now();
-        _stats.duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        _stats.time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
+
+    if(_logStats) logStatsToFile();
 
 }
 
@@ -145,4 +147,19 @@ int Engine::staticEval() {
     }
 
     return eval;
+}
+
+void Engine::logStatsToFile() {
+    std::ofstream logFile(_logFileName, std::ios::app | std::ios::out);
+
+    std::string duration = std::to_string(_stats.time / 1000) + "." + std::to_string(_stats.time % 1000);
+    
+    logFile << "FEN:" << _board.getFen() << "\n";
+    logFile << "\tTIME:" << duration << " DEPTH:" << _stats.depthSearched << "\n";
+    logFile << "\tNODES:" << _stats.nodesSearched << " Cutoffs:" << _stats.numCutoffs << "\n";
+    logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) << "\n";
+
+    logFile << "\n";
+    logFile.close();
+
 }

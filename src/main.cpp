@@ -13,6 +13,7 @@ int main() {
 
     Engine engine{};
     engine.useOpeningBook("Titans.bin");
+    engine.logStats("testLog.txt");
 
     const chess::Board& engineBoard = engine.getBoard();
     const Engine::SearchStatistics& stats = engine.getSearchStats();
@@ -28,7 +29,7 @@ int main() {
             engine.think(5);
 
             std::cout << chess::uci::moveToSan(engineBoard, engine.getBestMove()) << " " << engine.getEval() 
-                      << " " << stats.duration << "ms " << stats.nodesSearched << " "
+                      << " " << stats.time << "ms " << stats.nodesSearched << " "
                       << stats.numCutoffs << "\n";
             
             engine.makeMove(engine.getBestMove());

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <fstream>
 
 #include "chess.hpp"
 #include "polyglotReader.h"
@@ -10,7 +11,7 @@ public:
 
     struct SearchStatistics {
         int nodesSearched{0};
-        int duration{0};
+        int time{0};
         int numCutoffs{0};
         int depthSearched{0};
     };
@@ -31,8 +32,12 @@ public:
     //Setters
     void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
-    void collectStats(bool collectStats);
+    void collectStats(bool collectStats) {_collectStats = collectStats;}
 
+    void logStats(std::string_view logFileName);
+    void stopLogStats() {_logStats = false;}
+
+    //Engine commands
     void makeMove(const chess::Move& move);
     void think(int maxPly);
 
@@ -117,12 +122,16 @@ private:
 
     //STATISTICS
     bool _collectStats{true};
+    bool _logStats{false};
     SearchStatistics _stats{};
+    std::string _logFileName{};
 
     std::optional<PolyglotReader> _openingBook{std::nullopt};
 
-    int negamax(int ply, int alpha, int beta);
     int staticEval();
     inline void getBookMoves(chess::Movelist& moves) {_openingBook.value().getMoves(moves, _board);}
+    void logStatsToFile();
+
+    int negamax(int ply, int alpha, int beta);
 
 };
