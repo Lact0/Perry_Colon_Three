@@ -13,17 +13,18 @@ int main() {
 
     Engine engine{};
     engine.useOpeningBook("Titans.bin");
-    engine.logStats("testLog.txt");
+    engine.logStats("Log Files/preTT.txt");
 
     const chess::Board& engineBoard = engine.getBoard();
     const Engine::SearchStatistics& stats = engine.getSearchStats();
 
     while(engineBoard.isGameOver().second == chess::GameResult::NONE) {
 
-        if(engineBoard.sideToMove() == chess::Color::WHITE) {
+        if(false && engineBoard.sideToMove() == chess::Color::WHITE) {
             std::string sanMove;
             std::cin >> sanMove;
             engine.makeMove(chess::uci::parseSan(engineBoard, sanMove));
+
         } else {
 
             engine.think(5);

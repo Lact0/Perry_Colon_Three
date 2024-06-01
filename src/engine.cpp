@@ -65,7 +65,7 @@ void Engine::think(int maxPly) {
         _eval = bestEval;
         _bestMove = bestMove;
 
-        if(_collectStats) _stats.depthSearched = ply;
+        if(_collectStats) _stats.depthSearched = ply + 1;
 
     }
 
