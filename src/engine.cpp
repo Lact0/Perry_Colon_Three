@@ -11,6 +11,11 @@ void Engine::useOpeningBook(std::string_view fileName) {
     _openingBook.emplace(fileName);
 }
 
+void Engine::collectStats(bool collectStats) {
+    _collectStats = true;
+}
+
+
 void Engine::makeMove(const chess::Move& move) {
     _board.makeMove(move);
     _bestMove = chess::Move();
@@ -18,6 +23,14 @@ void Engine::makeMove(const chess::Move& move) {
 }
 
 void Engine::think(int maxPly) {
+
+    using time = std::chrono::_V2::system_clock::time_point;
+    time start;
+
+    if(_collectStats) {
+        start = std::chrono::high_resolution_clock::now();
+        _stats = SearchStatistics{};
+    }
 
     //Gen moves
     chess::Movelist moves{};
@@ -27,11 +40,6 @@ void Engine::think(int maxPly) {
     chess::Movelist bookMoves{};
     if(_useOpeningBook) getBookMoves(bookMoves);
     bool bookMoveExists{bookMoves.size() > 0};
-
-    if(bookMoveExists) {
-        _bestMove = bookMoves[0];
-        return;
-    }
 
     //Iterative Deepening
     for(int ply{0}; ply < maxPly; ++ply) {
@@ -57,14 +65,23 @@ void Engine::think(int maxPly) {
         _eval = bestEval;
         _bestMove = bestMove;
 
+        if(_collectStats) _stats.depthSearched = ply;
+
     }
 
     //Bookmove trumps search
     if(bookMoveExists) _bestMove = bookMoves[0];
 
+    if(_collectStats) {
+        time end = std::chrono::high_resolution_clock::now();
+        _stats.duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    }
+
 }
 
 int Engine::negamax(int ply, int alpha, int beta) {
+
+    if(_collectStats) ++_stats.nodesSearched;
 
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
@@ -94,7 +111,10 @@ int Engine::negamax(int ply, int alpha, int beta) {
         if(curEval > bestEval) bestEval = curEval;
 
         //Prune
-        if(alpha >= beta) break;
+        if(alpha >= beta) {
+            if(_collectStats) ++_stats.numCutoffs;
+            break;
+        }
     }
 
     return bestEval;

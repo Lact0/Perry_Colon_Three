@@ -1,14 +1,16 @@
 CC = g++
-FIL = engine.o polyglotReader.o
+SRCS = $(wildcard src/*.cpp)
+DOTO = $(SRCS:src/%.cpp=%.o)
+DBG = #-g -ggdb
 
-main.exe: main.o ${FIL}
-	${CC} -o main main.o ${FIL} ${GoodPractice}
+main.exe: ${DOTO}
+	${CC} -o main ${DOTO} ${DBG}
 
 main.o: src/main.cpp
-	${CC} -c $<
+	${CC} -c $< ${DBG}
 
 %.o: src/%.cpp src/%.h
-	${CC} -c $<
+	${CC} -c $< ${DBG}
 
 clean:
-	del *.o
+	rm *.o

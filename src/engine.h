@@ -1,26 +1,37 @@
 #pragma once
 
+#include <chrono>
+
 #include "chess.hpp"
 #include "polyglotReader.h"
-
 
 class Engine {
 public:
 
-    Engine() = default;
+    struct SearchStatistics {
+        int nodesSearched{0};
+        int duration{0};
+        int numCutoffs{0};
+        int depthSearched{0};
+    };
 
+    //Constructors
+    Engine() = default;
     Engine(chess::Board board)
         : _board{board}
         , _eval{staticEval()}
     {}
 
-    void setBoard(chess::Board board);
-    
+    //Getters
     int getEval() {return _eval;}
-    chess::Board getBoard() {return _board;}
-    chess::Move getBestMove() {return _bestMove;}
+    const chess::Board& getBoard() {return _board;}
+    const chess::Move& getBestMove() {return _bestMove;}
+    const SearchStatistics& getSearchStats() {return _stats;}
 
+    //Setters
+    void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
+    void collectStats(bool collectStats);
 
     void makeMove(const chess::Move& move);
     void think(int maxPly);
@@ -29,7 +40,7 @@ private:
 
     //CONSTANTS
     static constexpr int _pInf{1000000};
-    static constexpr int _nInf{-1000000};
+    static constexpr int _nInf{-1000000}; 
 
     static constexpr int _pieceSquareTable[6][64] = {
         { // PAWN
@@ -103,6 +114,10 @@ private:
     chess::Board _board{};
     chess::Move _bestMove{};
     int _eval{0};
+
+    //STATISTICS
+    bool _collectStats{true};
+    SearchStatistics _stats{};
 
     std::optional<PolyglotReader> _openingBook{std::nullopt};
 

@@ -1,21 +1,38 @@
 #include <iostream>
 #include <fstream> 
 #include <array>
+#include <chrono>
 
 #include "chess.hpp"
 #include "polyglotReader.h"
 #include "engine.h"
 
+
+
 int main() {
 
-    Engine engine{chess::Board("8/8/8/p3p3/P2n4/7k/KP6/3q4 w - - 5 59")};
+    Engine engine{};
     engine.useOpeningBook("Titans.bin");
 
-    while(engine.getBoard().isGameOver().second == chess::GameResult::NONE) {
+    const chess::Board& engineBoard = engine.getBoard();
+    const Engine::SearchStatistics& stats = engine.getSearchStats();
 
-        engine.think(4);
-        std::cout << chess::uci::moveToSan(engine.getBoard(), engine.getBestMove()) << " " << engine.getEval() << "\n";
-        engine.makeMove(engine.getBestMove());
+    while(engineBoard.isGameOver().second == chess::GameResult::NONE) {
+
+        if(engineBoard.sideToMove() == chess::Color::WHITE) {
+            std::string sanMove;
+            std::cin >> sanMove;
+            engine.makeMove(chess::uci::parseSan(engineBoard, sanMove));
+        } else {
+
+            engine.think(5);
+
+            std::cout << chess::uci::moveToSan(engineBoard, engine.getBestMove()) << " " << engine.getEval() 
+                      << " " << stats.duration << "ms " << stats.nodesSearched << " "
+                      << stats.numCutoffs << "\n";
+            
+            engine.makeMove(engine.getBestMove());
+        }
     }
 
     std::cout << "GAME OVER.";
