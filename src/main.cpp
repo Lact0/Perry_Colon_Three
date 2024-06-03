@@ -13,7 +13,7 @@ int main() {
 
     Engine engine{};
     engine.useOpeningBook("Titans.bin");
-    engine.logStats("Log Files/preTT.txt");
+    // engine.logStats("Log Files/6-1-24#2.txt");
 
     const chess::Board& engineBoard = engine.getBoard();
     const Engine::SearchStatistics& stats = engine.getSearchStats();
@@ -27,15 +27,25 @@ int main() {
 
         } else {
 
-            engine.think(5);
+            engine.think(10);
+
+            int searchTime = 100;
+            auto startTime = std::chrono::high_resolution_clock::now();
+
+            while(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::high_resolution_clock::now() - startTime).count() < searchTime
+                || !engine.isSearching()) {}
+            engine.stopSearching();
+
+
 
             std::cout << chess::uci::moveToSan(engineBoard, engine.getBestMove()) << " " << engine.getEval() 
                       << " " << stats.time << "ms " << stats.nodesSearched << " "
-                      << stats.numCutoffs << "\n";
+                      << stats.numCutoffs << " " << stats.depthSearched << "\n";
             
             engine.makeMove(engine.getBestMove());
         }
     }
 
-    std::cout << "GAME OVER.";
+    std::cout << "GAME OVER." << static_cast<int>(engineBoard.isGameOver().first);
 }

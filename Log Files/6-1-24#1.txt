@@ -1,3 +1,8 @@
+Self game with depth 5 think
+
+Params
+	OPbook: Titans
+
 FEN:rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 	MOVE:e4 EVAL:66
 	TIME:1.866 DEPTH:5

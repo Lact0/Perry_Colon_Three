@@ -9,6 +9,12 @@ void Engine::setBoard(chess::Board board) {
 void Engine::useOpeningBook(std::string_view fileName) {
     _useOpeningBook = true;
     _openingBook.emplace(fileName);
+
+}
+
+void Engine::stopSearching() {
+    _stopSearching = true;
+    _thinkThread.join();
 }
 
 void Engine::logStats(std::string_view logFileName) {
@@ -23,6 +29,20 @@ void Engine::makeMove(const chess::Move& move) {
 }
 
 void Engine::think(int maxPly) {
+
+    //Prevent from starting a second think thread
+    if(_isSearching) return;
+
+    //Setup concurrency variables
+    if(_thinkThread.joinable()) _thinkThread.join();
+    _stopSearching = false;
+    _isSearching = true;
+
+    //Start thread
+    _thinkThread = std::thread{&Engine::thinkWorker, this, maxPly};
+}
+
+void Engine::thinkWorker(int maxPly) {
 
     using time = std::chrono::_V2::system_clock::time_point;
     time start;
@@ -62,6 +82,9 @@ void Engine::think(int maxPly) {
 
         }
 
+        //Handle for early exit
+        if(_stopSearching) break;
+
         _eval = bestEval;
         _bestMove = bestMove;
 
@@ -79,10 +102,12 @@ void Engine::think(int maxPly) {
 
     if(_logStats) logStatsToFile();
 
+    _isSearching = false;
 }
 
 int Engine::negamax(int ply, int alpha, int beta) {
 
+    if(_stopSearching) return 0;
     if(_collectStats) ++_stats.nodesSearched;
 
     chess::Movelist moves{};
@@ -90,6 +115,7 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
     if(moves.empty() && _board.inCheck()) return _nInf;
     if(moves.empty() && !_board.inCheck()) return 0;
+    if(_board.isRepetition(1)) return 0;
 
     int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
     if(ply == 0) return staticEval() * sideToMove;
@@ -98,6 +124,8 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
     //Main loop
     for(const chess::Move& move: moves) {
+
+        if(_stopSearching) return bestEval;
         
         //Get eval of move
         _board.makeMove(move);

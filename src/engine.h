@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <fstream>
+#include <atomic>
+#include <thread>
 
 #include "chess.hpp"
 #include "polyglotReader.h"
@@ -28,11 +30,13 @@ public:
     const chess::Board& getBoard() {return _board;}
     const chess::Move& getBestMove() {return _bestMove;}
     const SearchStatistics& getSearchStats() {return _stats;}
+    bool isSearching() {return _isSearching;}
 
     //Setters
     void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
     void collectStats(bool collectStats) {_collectStats = collectStats;}
+    void stopSearching();
 
     void logStats(std::string_view logFileName);
     void stopLogStats() {_logStats = false;}
@@ -46,8 +50,8 @@ private:
     //CONSTANTS
     static constexpr int _pInf{1000000};
     static constexpr int _nInf{-1000000}; 
-
     static constexpr int _pieceSquareTable[6][64] = {
+
         { // PAWN
                 0,   0,   0,   0,   0,   0,   0,   0,
                 5,  10,  10, -20, -20,  10,  10,   5,
@@ -120,18 +124,28 @@ private:
     chess::Move _bestMove{};
     int _eval{0};
 
+    //Concurrency 
+    std::thread _thinkThread{};
+    std::atomic_bool _stopSearching{false};
+    std::atomic_bool _isSearching{false};
+
+    void thinkWorker(int maxPly);
+
     //STATISTICS
     bool _collectStats{true};
     bool _logStats{false};
     SearchStatistics _stats{};
     std::string _logFileName{};
-
-    std::optional<PolyglotReader> _openingBook{std::nullopt};
-
-    int staticEval();
-    inline void getBookMoves(chess::Movelist& moves) {_openingBook.value().getMoves(moves, _board);}
+    
     void logStatsToFile();
 
+    //OPENING BOOK READER
+    std::optional<PolyglotReader> _openingBook{std::nullopt};
+    
+    inline void getBookMoves(chess::Movelist& moves) {_openingBook.value().getMoves(moves, _board);}
+
+    //FUNCTIONS
+    int staticEval();
     int negamax(int ply, int alpha, int beta);
 
 };
