@@ -36,7 +36,7 @@ public:
     void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
     void collectStats(bool collectStats) {_collectStats = collectStats;}
-    void stopSearching();
+    void finishSearching();
 
     void logStats(std::string_view logFileName);
     void stopLogStats() {_logStats = false;}

@@ -29,13 +29,13 @@ int main() {
 
             engine.think(10);
 
-            int searchTime = 100;
+            int searchTime = 1000;
             auto startTime = std::chrono::high_resolution_clock::now();
 
             while(std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::high_resolution_clock::now() - startTime).count() < searchTime
                 || !engine.isSearching()) {}
-            engine.stopSearching();
+            engine.finishSearching();
 
 
 

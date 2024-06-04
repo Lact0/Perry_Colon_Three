@@ -12,7 +12,7 @@ void Engine::useOpeningBook(std::string_view fileName) {
 
 }
 
-void Engine::stopSearching() {
+void Engine::finishSearching() {
     _stopSearching = true;
     _thinkThread.join();
 }
@@ -34,7 +34,6 @@ void Engine::think(int maxPly) {
     if(_isSearching) return;
 
     //Setup concurrency variables
-    if(_thinkThread.joinable()) _thinkThread.join();
     _stopSearching = false;
     _isSearching = true;
 
