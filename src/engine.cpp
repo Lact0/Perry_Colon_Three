@@ -14,7 +14,8 @@ void Engine::useOpeningBook(std::string_view fileName) {
 
 void Engine::finishSearching() {
     _stopSearching = true;
-    _thinkThread.join();
+    if(_thinkThread.joinable()) _thinkThread.join();
+    if(_timerThread.joinable()) _timerThread.join();
 }
 
 void Engine::logStats(std::string_view logFileName) {
@@ -28,7 +29,7 @@ void Engine::makeMove(const chess::Move& move) {
     _eval = staticEval();
 }
 
-void Engine::think(int maxPly) {
+void Engine::thinkToPly(int maxPly) {
 
     //Prevent from starting a second think thread
     if(_isSearching) return;
@@ -39,6 +40,17 @@ void Engine::think(int maxPly) {
 
     //Start thread
     _thinkThread = std::thread{&Engine::thinkWorker, this, maxPly};
+}
+
+void Engine::think(int mili) {
+
+    if(_isSearching) return;
+
+    _stopSearching = false;
+    _isSearching = true;
+
+    _thinkThread = std::thread{&Engine::thinkWorker, this, 100};
+    _timerThread = std::thread(&Engine::timerWorker, this, mili);
 }
 
 void Engine::thinkWorker(int maxPly) {
@@ -102,6 +114,15 @@ void Engine::thinkWorker(int maxPly) {
     if(_logStats) logStatsToFile();
 
     _isSearching = false;
+}
+
+void Engine::timerWorker(int mili) {
+    auto start = std::chrono::high_resolution_clock::now();
+    while(std::chrono::duration_cast<std::chrono::milliseconds>
+         (std::chrono::high_resolution_clock::now() - start).count() < mili
+         && !_stopSearching) {}
+    
+    _stopSearching = true;
 }
 
 int Engine::negamax(int ply, int alpha, int beta) {

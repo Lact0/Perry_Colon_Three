@@ -43,7 +43,8 @@ public:
 
     //Engine commands
     void makeMove(const chess::Move& move);
-    void think(int maxPly);
+    void thinkToPly(int maxPly);
+    void think(int mili);
 
 private:
 
@@ -124,12 +125,14 @@ private:
     chess::Move _bestMove{};
     int _eval{0};
 
-    //Concurrency 
+    //CONCURRENCY 
     std::thread _thinkThread{};
+    std::thread _timerThread{};
     std::atomic_bool _stopSearching{false};
     std::atomic_bool _isSearching{false};
 
     void thinkWorker(int maxPly);
+    void timerWorker(int mili);
 
     //STATISTICS
     bool _collectStats{true};

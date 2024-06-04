@@ -4,13 +4,13 @@ DOTO = $(SRCS:src/%.cpp=%.o)
 DBG = #-g -ggdb
 
 main.exe: ${DOTO}
-	${CC} -o main ${DOTO} ${DBG} -pthread
+	${CC} -o main ${DOTO} ${DBG} 
 
 main.o: src/main.cpp
-	${CC} -c $< ${DBG} -pthread
+	${CC} -c $< ${DBG} 
 
 %.o: src/%.cpp src/%.h
-	${CC} -c $< ${DBG} -pthread
+	${CC} -c $< ${DBG} 
 
 clean:
 	rm *.o
