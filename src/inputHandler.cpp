@@ -17,6 +17,6 @@ void InputHandler::join() {
 
 void InputHandler::recieveInput() {
     _hasInput = false;
-    std::cin >> _input;
+    std::getline(std::cin, _input);
     _hasInput = true;
 }
