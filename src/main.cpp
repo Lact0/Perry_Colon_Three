@@ -68,7 +68,7 @@ chess::Board parsePositionCmd(std::vector<std::string>& movelist) {
 void finishThinking(Engine& engine) {
     engine.finishSearching();
     std::string bestMove = chess::uci::moveToUci(engine.getBestMove());
-    std::cout << "bestmove " + bestMove + "\n";
+    std::cout << "bestmove " + bestMove + "\n" << std::flush;;
 }
 
 void runUCI() {
@@ -177,47 +177,42 @@ void runGame(int mili) {
     const Engine::SearchStatistics& stats = engine.getSearchStats();
 
     while(engineBoard.isGameOver().second == chess::GameResult::NONE) {
-        if(false && engineBoard.sideToMove() == chess::Color::WHITE) {
-            std::string sanMove;
-            std::cin >> sanMove;
-            engine.makeMove(chess::uci::parseSan(engineBoard, sanMove));
+        engine.think(mili);
+        while(engine.isSearching()) {}
+        engine.finishSearching();
 
-        } else {
-
-            engine.think(mili);
-            while(engine.isSearching()) {}
-            engine.finishSearching();
-
-            std::cout << chess::uci::moveToSan(engineBoard, engine.getBestMove()) << " " << engine.getEval() 
-                      << " " << stats.time << "ms " << stats.nodesSearched << " "
-                      << stats.numCutoffs << " " << stats.depthSearched << "\n";
-            
-            engine.makeMove(engine.getBestMove());
-        }
+        std::cout << chess::uci::moveToSan(engineBoard, engine.getBestMove()) << " " << engine.getEval() 
+                    << " " << stats.time << "ms " << stats.nodesSearched << " "
+                    << stats.numCutoffs << " " << stats.depthSearched << "\n";
+        
+        engine.makeMove(engine.getBestMove());
     }
     std::cout << "GAME OVER:" << static_cast<int>(engineBoard.isGameOver().first) << 
-        " " << static_cast<int>(engineBoard.sideToMove());
+        " " << static_cast<int>(engineBoard.sideToMove()) << "\n";
 }
 
 int main() {
 
-    std::string inp;
-    std::getline(std::cin, inp);
+    std::string inp = "";
 
-    std::vector<std::string> cmd = splitString(inp);
+    while(inp != "exit") {
+        std::getline(std::cin, inp);
 
-    if(cmd[0] == "uci") runUCI();
-    else if(cmd[0] == "selfgame") runGame(std::stoi(cmd[1]));
+        std::vector<std::string> cmd = splitString(inp);
+
+        if(cmd[0] == "uci") runUCI();
+        else if(cmd[0] == "selfgame") runGame(std::stoi(cmd[1]));
+    }
 
 
-    Engine engine{};
-    engine.useOpeningBook("Titans.bin");
-    // engine.logStats("Log Files/6-4-24#1.txt");
+    // Engine engine{};
+    // engine.useOpeningBook("Titans.bin");
+    // // engine.logStats("Log Files/6-4-24#1.txt");
 
-    InputHandler inputHandler{};
+    // InputHandler inputHandler{};
 
-    const chess::Board& engineBoard = engine.getBoard();
-    const Engine::SearchStatistics& stats = engine.getSearchStats();
+    // const chess::Board& engineBoard = engine.getBoard();
+    // const Engine::SearchStatistics& stats = engine.getSearchStats();
 
     // bool searching = false;
     // inputHandler.start();
