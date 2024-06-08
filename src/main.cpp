@@ -78,17 +78,40 @@ void runUCI() {
     std::cout << "id author Peter Perry\n";
     
     //TODO: GIVE AND RECIEVE OPTIONS
-
     std::cout << "uciok\n";
 
-    //Wait until gui is ready
-    std::string inp;
-    std::getline(std::cin, inp);
+    bool useOutsideOpeningBook = false;
+    std::string bookFileName;
+
+    bool logToFile = false;
+    std::string logFileName;
+
+    //Parse gui options
+    std::string inp = "";
     while(inp != "isready") {
         std::getline(std::cin, inp);
+        std::vector<std::string> cmd = splitString(inp);
+        
+        if(cmd[0] == "useOutsideOpeningBook") {
+            useOutsideOpeningBook = true;
+            bookFileName = cmd[1];
+        }
+
+        if(cmd[0] == "logToFile") {
+            logToFile = true;
+            logFileName = cmd[1];
+            for(int i = 2; i < cmd.size(); i++) {
+                logFileName += " " + cmd[i];
+            }
+            std::cout << logFileName << "\n";
+        }
     }
     
     Engine engine{};
+
+    if(useOutsideOpeningBook) engine.useOpeningBook(bookFileName);
+    if(logToFile) engine.logStats(logFileName);
+
     std::cout << "readyok\n";
 
     bool isThinking = false;
