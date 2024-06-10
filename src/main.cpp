@@ -68,7 +68,7 @@ chess::Board parsePositionCmd(std::vector<std::string>& movelist) {
 void finishThinking(Engine& engine) {
     engine.finishSearching();
     std::string bestMove = chess::uci::moveToUci(engine.getBestMove());
-    std::cout << "bestmove " + bestMove + "\n" << std::flush;;
+    std::cout << "bestmove " + bestMove + "\n" << std::flush;
 }
 
 void runUCI() {
