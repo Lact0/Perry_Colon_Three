@@ -74,7 +74,7 @@ void finishThinking(Engine& engine) {
 void runUCI() {
 
     //Send init info
-    std::cout << "id name Perry Colon Zero\n";
+    std::cout << "id name Perry Colon Three\n";
     std::cout << "id author Peter Perry\n";
     
     //TODO: GIVE AND RECIEVE OPTIONS

@@ -66,6 +66,7 @@ void Engine::thinkWorker(int maxPly) {
     //Gen moves
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
+    if(moves.size() > 0) _bestMove = moves[0];
 
     //Look up book moves
     chess::Movelist bookMoves{};
