@@ -201,7 +201,9 @@ int Engine::staticEval() {
 void Engine::logStatsToFile() {
     std::ofstream logFile(_logFileName, std::ios::app | std::ios::out);
 
-    std::string duration = std::to_string(_stats.time / 1000) + "." + std::to_string(_stats.time % 1000);
+    std::string decimal = std::to_string(_stats.time % 1000);
+    while(decimal.length() < 3) decimal = "0" + decimal;
+    std::string duration = std::to_string(_stats.time / 1000) + "." + decimal;
     
     logFile << "FEN:" << _board.getFen() << "\n";
     logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" << _eval << "\n";

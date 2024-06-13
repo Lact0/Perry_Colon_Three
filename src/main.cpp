@@ -130,34 +130,33 @@ void runUCI() {
             inp = inputHandler.getInput();
             std::vector<std::string> cmd = splitString(inp);
 
-            if(inp == "ucinewgame") {
+            if(cmd.size() == 0) {
+                std::cout << "DEBUG: EMTPY INPUT, IGNORING\n" << std::flush;
+            } else if(inp == "ucinewgame") {
                 engine.setBoard(chess::Board());
-            }
-
-            if(cmd[0] == "position") {
+            } else if(cmd[0] == "position") {
                 engine.setBoard(parsePositionCmd(cmd));
-            }
+                std::cout << "DEBUG: Position command recieved.\n" << std::flush;
+            } else if(cmd[0] == "go") {
 
-            if(cmd[0] == "go") {
-                
-                if(cmd[1] == "infinite") {
+                if(cmd.size() == 1) {
                     engine.thinkToPly(100);
                     isThinking = true;
-                }
-                
-                if(cmd[1] == "depth") {
+                    std::cout << "DEBUG: GO COMMAND WITH ONLY ONE ARG WAS GIVEN\n" << std::flush;
+                } else if(cmd[1] == "infinite") {
+                    engine.thinkToPly(100);
+                    isThinking = true;
+                } else if(cmd[1] == "depth") {
                     engine.thinkToPly(std::stoi(cmd[2]));
                     isThinking = true;
-                }
-
-                if(cmd[1] == "movetime") {
+                } else if(cmd[1] == "movetime") {
                     engine.think(std::stoi(cmd[2]));
                     isThinking = true; 
                 }
 
-            } 
-            
-            if(cmd[0] == "stop") {
+                std::cout << "DEBUG: Go command recieved. "<< inp << "\n" << std::flush;
+
+            } else if(cmd[0] == "stop") {
                 finishThinking(engine);
                 isThinking = false;
             }

@@ -1,10 +1,25 @@
 #include "inputHandler.h"
 
+bool InputHandler::inputRecieved() {
+    bool hasInput;
+    
+    _mutex.lock();
+    hasInput = _hasInput;
+    _mutex.unlock();
+
+    return hasInput;
+}
+
 std::string InputHandler::getInput() {
+    std::string input = _input;
+    
+    _mutex.lock();
+    _hasInput = false;
+    _mutex.unlock();
+
     join();
     start();
-    _hasInput = false;
-    return _input;
+    return input;
 }
 
 void InputHandler::start() {
@@ -16,7 +31,13 @@ void InputHandler::join() {
 }
 
 void InputHandler::recieveInput() {
+    _mutex.lock();
     _hasInput = false;
+    _mutex.unlock();
+    
     std::getline(std::cin, _input);
+
+    _mutex.lock();
     _hasInput = true;
+    _mutex.unlock();
 }

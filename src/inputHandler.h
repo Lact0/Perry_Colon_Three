@@ -2,13 +2,14 @@
 
 #include <iostream>
 #include <thread>
+#include <mutex>
 
 class InputHandler {
 public:
 
     InputHandler() = default;
 
-    bool inputRecieved() {return _hasInput;}
+    bool inputRecieved();
     std::string getInput();
     void start();
     void join();
@@ -17,6 +18,7 @@ public:
 private:
 
     bool _hasInput{false};
+    std::mutex _mutex{};
     std::string _input{};
     std::thread _inputThread{};
 
