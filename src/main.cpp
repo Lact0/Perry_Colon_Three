@@ -154,7 +154,7 @@ void runUCI() {
                     isThinking = true; 
                 }
 
-                std::cout << "DEBUG: Go command recieved. "<< inp << "\n" << std::flush;
+                std::cout << "DEBUG: Go command recieved.\n" << std::flush;
 
             } else if(cmd[0] == "stop") {
                 finishThinking(engine);

@@ -131,6 +131,15 @@ int Engine::negamax(int ply, int alpha, int beta) {
     if(_stopSearching) return 0;
     if(_collectStats) ++_stats.nodesSearched;
 
+    //Check table for valid entry
+    if(_table.hasEntry(_board.hash())) {
+        const TTable::Entry& entry = _table.getEntry(_board.hash());
+        if(entry.depth >= ply) {
+            if(_collectStats) ++_stats.tableHits;
+            return entry.eval;
+        }
+    }
+
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
 
@@ -167,6 +176,13 @@ int Engine::negamax(int ply, int alpha, int beta) {
             break;
         }
     }
+
+    //Store data in table
+    TTable::Entry entry{};
+    entry.zobrist = _board.hash();
+    entry.depth = ply;
+    entry.eval = bestEval;
+    _table.storeEntry(entry);
 
     return bestEval;
 }
@@ -208,7 +224,8 @@ void Engine::logStatsToFile() {
     logFile << "FEN:" << _board.getFen() << "\n";
     logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" << _eval << "\n";
     logFile << "\tTIME:" << duration << " DEPTH:" << _stats.depthSearched << "\n";
-    logFile << "\tNODES:" << _stats.nodesSearched << " Cutoffs:" << _stats.numCutoffs << "\n";
+    logFile << "\tNODES:" << _stats.nodesSearched << " CUTOFFS:" << _stats.numCutoffs << "\n";
+    logFile << "\tTABLE HITS:" << _stats.tableHits << "\n";
 
     logFile << "\n";
     logFile.close();
