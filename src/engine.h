@@ -38,9 +38,10 @@ public:
     void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
     void collectStats(bool collectStats) {_collectStats = collectStats;}
-    void setTableSize(int size) {_table = TTable(size);}
-    void finishSearching();
+    void setTableSize(int size) {_table.resize(size);}
 
+    void clearTable() {_table.clear();}
+    void finishSearching();
     void logStats(std::string_view logFileName);
     void stopLogStats() {_logStats = false;}
 
@@ -127,7 +128,7 @@ private:
     chess::Board _board{};
     chess::Move _bestMove{};
     int _eval{0};
-    TTable _table{4};
+    TTable _table{1};
 
     //CONCURRENCY 
     std::thread _thinkThread{};

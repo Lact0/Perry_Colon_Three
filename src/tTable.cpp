@@ -3,11 +3,11 @@
 TTable::TTable(int size) {
     _size = size;
     _numEntries = size * 1000 / sizeof(TTable::Entry);
-    _table = new Entry[_numEntries];
+    _table = new TTable::Entry[_numEntries];
 }
 
 TTable::~TTable() {
-    clear();
+    delete[] _table;
 }
 
 bool TTable::hasEntry(uint64_t zobrist) {
@@ -26,8 +26,14 @@ void TTable::storeEntry(TTable::Entry entry) {
     _table[entry.zobrist % _numEntries] = entry;
 }
 
-void TTable::clear() {
-    _size = 0;
-    _numEntries = 0;
+void TTable::resize(int size) {
+    _size = size;
+    _numEntries = size * 1000 / sizeof(TTable::Entry);
     delete[] _table;
+    _table = new TTable::Entry[_numEntries];
+}
+
+void TTable::clear() {
+    delete[] _table;
+    _table = new TTable::Entry[_numEntries];
 }

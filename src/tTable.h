@@ -17,6 +17,7 @@ public:
     const Entry& getEntry(uint64_t zobrist);
 
     void storeEntry(Entry entry);
+    void resize(int size);
 
     void clear();
 

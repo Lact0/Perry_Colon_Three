@@ -78,11 +78,14 @@ void runUCI() {
     std::cout << "id author Peter Perry\n";
     
     //TODO: GIVE AND RECIEVE OPTIONS
+    std::cout << "option name Hash type spin default 1 min 1 max 128\n";
+    std::cout << "option name ClearHash type button\n";
     std::cout << "uciok\n";
-
+    
+    //Option settings
+    int tableSize = 1;
     bool useOutsideOpeningBook = false;
     std::string bookFileName;
-
     bool logToFile = false;
     std::string logFileName;
 
@@ -105,12 +108,19 @@ void runUCI() {
             }
             std::cout << logFileName << "\n";
         }
+
+        if(cmd[0] == "setoption") {
+            if(cmd[2] == "Hash") {
+                tableSize = std::stoi(cmd[4]);
+            }
+        }
     }
     
     Engine engine{};
 
     if(useOutsideOpeningBook) engine.useOpeningBook(bookFileName);
     if(logToFile) engine.logStats(logFileName);
+    engine.setTableSize(tableSize);
 
     std::cout << "readyok\n";
 
@@ -155,6 +165,10 @@ void runUCI() {
                 }
 
                 std::cout << "DEBUG: Go command recieved.\n" << std::flush;
+
+            } else if(cmd[0] == "setoption") {
+
+                if(cmd[2] == "ClearHash") engine.clearTable();
 
             } else if(cmd[0] == "stop") {
                 finishThinking(engine);
