@@ -84,6 +84,9 @@ void runUCI() {
     
     //Option settings
     int tableSize = 1;
+    
+    //Custom settings
+    bool debugOn = false;
     bool useOutsideOpeningBook = false;
     std::string bookFileName;
     bool logToFile = false;
@@ -114,6 +117,10 @@ void runUCI() {
                 tableSize = std::stoi(cmd[4]);
             }
         }
+
+        if(cmd[0] == "debugOn") {
+            debugOn = true;
+        }
     }
     
     Engine engine{};
@@ -121,6 +128,12 @@ void runUCI() {
     if(useOutsideOpeningBook) engine.useOpeningBook(bookFileName);
     if(logToFile) engine.logStats(logFileName);
     engine.setTableSize(tableSize);
+
+    if(debugOn) {
+        std::cout << "DEBUG: Table Size set to " << tableSize << "\n" << std::flush;
+        if(useOutsideOpeningBook) std::cout << "DEBUG: Using opening book " << bookFileName << "\n" << std::flush;
+        if(logToFile) std::cout << "DEBUG: Logging to file " << logFileName << "\n" << std::flush;
+    }
 
     std::cout << "readyok\n";
 
@@ -141,18 +154,25 @@ void runUCI() {
             std::vector<std::string> cmd = splitString(inp);
 
             if(cmd.size() == 0) {
-                std::cout << "DEBUG: EMTPY INPUT, IGNORING\n" << std::flush;
+                if(debugOn) std::cout << "DEBUG: EMTPY INPUT, IGNORING\n" << std::flush;
+            
             } else if(inp == "ucinewgame") {
+            
                 engine.setBoard(chess::Board());
+                if(debugOn) std::cout << "DEBUG: New game set.\n" << std::flush;
+            
             } else if(cmd[0] == "position") {
+
                 engine.setBoard(parsePositionCmd(cmd));
-                std::cout << "DEBUG: Position command recieved.\n" << std::flush;
+                if(debugOn) std::cout << "DEBUG: Position command recieved.\n" << std::flush;
+            
             } else if(cmd[0] == "go") {
 
+                if(debugOn) std::cout << "DEBUG: Go command recieved.\n" << std::flush;
                 if(cmd.size() == 1) {
                     engine.thinkToPly(100);
                     isThinking = true;
-                    std::cout << "DEBUG: GO COMMAND WITH ONLY ONE ARG WAS GIVEN\n" << std::flush;
+                    if(debugOn) std::cout << "DEBUG: GO COMMAND WITH ONLY ONE ARG WAS GIVEN\n" << std::flush;
                 } else if(cmd[1] == "infinite") {
                     engine.thinkToPly(100);
                     isThinking = true;
@@ -164,18 +184,17 @@ void runUCI() {
                     isThinking = true; 
                 }
 
-                std::cout << "DEBUG: Go command recieved.\n" << std::flush;
-
             } else if(cmd[0] == "setoption") {
 
                 if(cmd[2] == "ClearHash") {
                     engine.clearTable();
-                    std::cout << "DEBUG: TTable cleared.\n" << std::flush;
+                    if(debugOn) std::cout << "DEBUG: TTable cleared.\n" << std::flush;
                 }
 
             } else if(cmd[0] == "stop") {
                 finishThinking(engine);
                 isThinking = false;
+                if(debugOn) std::cout << "DEBUG: Engine has stopped thinking.\n" << std::flush;
             }
 
         }
