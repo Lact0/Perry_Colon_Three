@@ -168,7 +168,10 @@ void runUCI() {
 
             } else if(cmd[0] == "setoption") {
 
-                if(cmd[2] == "ClearHash") engine.clearTable();
+                if(cmd[2] == "ClearHash") {
+                    engine.clearTable();
+                    std::cout << "DEBUG: TTable cleared.\n" << std::flush;
+                }
 
             } else if(cmd[0] == "stop") {
                 finishThinking(engine);

@@ -5,6 +5,13 @@
 class TTable {
 public:
     struct Entry {
+
+        enum {
+            EXACT,
+            LOWER,
+            UPPER
+        } flag;
+
         uint64_t zobrist{};
         int eval{};
         int depth{};

@@ -132,11 +132,22 @@ int Engine::negamax(int ply, int alpha, int beta) {
     if(_collectStats) ++_stats.nodesSearched;
 
     //Check table for valid entry
+    int oldAlpha = alpha;
     if(_table.hasEntry(_board.hash())) {
         const TTable::Entry& entry = _table.getEntry(_board.hash());
         if(entry.depth >= ply) {
             if(_collectStats) ++_stats.tableHits;
-            return entry.eval;
+            
+            switch(entry.flag) {
+            case TTable::Entry::EXACT: 
+                return entry.eval;
+            case TTable::Entry::LOWER:
+                if(entry.eval > alpha) alpha = entry.eval; break;
+            case TTable::Entry::UPPER:
+                if(entry.eval < beta) beta = entry.eval; break;
+            }
+
+            if(alpha >= beta) return entry.eval;
         }
     }
 
@@ -179,6 +190,9 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
     //Store data in table
     TTable::Entry entry{};
+    if(bestEval <= oldAlpha)  entry.flag = TTable::Entry::UPPER;
+    else if(bestEval >= beta) entry.flag = TTable::Entry::LOWER;
+    else                      entry.flag = TTable::Entry::EXACT;
     entry.zobrist = _board.hash();
     entry.depth = ply;
     entry.eval = bestEval;
