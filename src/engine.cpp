@@ -162,11 +162,16 @@ int Engine::negamax(int ply, int alpha, int beta) {
     if(ply == 0) return staticEval() * sideToMove;
     
     int bestEval{_nInf};
+    scoreMoves(moves);
 
     //Main loop
-    for(const chess::Move& move: moves) {
+    for(int i = 0; i < moves.size(); i++) {
 
         if(_stopSearching) return bestEval;
+
+        //Get ordered move
+        sortMoves(moves, i);
+        const chess::Move& move = moves[i]; 
         
         //Get eval of move
         _board.makeMove(move);
@@ -244,4 +249,39 @@ void Engine::logStatsToFile() {
     logFile << "\n";
     logFile.close();
 
+}
+
+void Engine::scoreMoves(chess::Movelist& moves) {
+    for(chess::Move& move: moves) {
+        
+        _board.makeMove(move);
+        bool inCheck = _board.inCheck();
+        _board.unmakeMove(move);
+        
+        if(inCheck) move.setScore(50);
+        else if(_board.isCapture(move)) {
+            //Ranges from 20 to 30
+            chess::PieceType attacker = _board.at<chess::PieceType>(move.from());
+            chess::PieceType victim = _board.at<chess::PieceType>(move.to());
+            move.setScore(25 + ((int)victim - (int)attacker));
+        } else {
+            move.setScore(0);
+        }
+    }
+}
+
+void Engine::sortMoves(chess::Movelist& moves, int ind) {
+
+    //Get best move in range
+    int maxInd = ind;
+    for(int i = ind; i < moves.size(); i++) {
+        if(moves[i].score() > moves[maxInd].score()) maxInd = i;
+    }
+
+    if(maxInd == ind) return;
+
+    //Swap best move to be first
+    chess::Move temp = moves[ind];
+    moves[ind] = moves[maxInd];
+    moves[maxInd] = temp;
 }

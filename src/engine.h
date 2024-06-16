@@ -155,5 +155,7 @@ private:
     //FUNCTIONS
     int staticEval();
     int negamax(int ply, int alpha, int beta);
+    void scoreMoves(chess::Movelist& moves);
+    void sortMoves(chess::Movelist& moves, int ind);
 
 };
