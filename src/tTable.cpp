@@ -2,7 +2,7 @@
 
 TTable::TTable(int size) {
     _size = size;
-    _numEntries = size * 1000 / sizeof(TTable::Entry);
+    _numEntries = size * 1000000 / sizeof(TTable::Entry);
     _table = new TTable::Entry[_numEntries];
 }
 
