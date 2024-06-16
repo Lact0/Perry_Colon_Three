@@ -162,6 +162,7 @@ int Engine::negamax(int ply, int alpha, int beta) {
     if(ply == 0) return staticEval() * sideToMove;
     
     int bestEval{_nInf};
+    chess::Move bestMove{};
     scoreMoves(moves);
 
     //Main loop
@@ -184,7 +185,10 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
         //Update Evals
         if(curEval > alpha) alpha = curEval;
-        if(curEval > bestEval) bestEval = curEval;
+        if(curEval > bestEval) {
+            bestEval = curEval;
+            bestMove = move;
+        }
 
         //Prune
         if(alpha >= beta) {
@@ -201,6 +205,7 @@ int Engine::negamax(int ply, int alpha, int beta) {
     entry.zobrist = _board.hash();
     entry.depth = ply;
     entry.eval = bestEval;
+    entry.bestMove = bestMove;
     _table.storeEntry(entry);
 
     return bestEval;
@@ -252,8 +257,21 @@ void Engine::logStatsToFile() {
 }
 
 void Engine::scoreMoves(chess::Movelist& moves) {
+
+    bool tableMoveExists = false;
+    chess::Move tableMove;
+    if(_table.hasEntry(_board.hash())) {
+        tableMove = _table.getEntry(_board.hash()).bestMove;
+        tableMoveExists = true;
+    }
+
     for(chess::Move& move: moves) {
         
+        if (tableMoveExists && (move == tableMove)) {
+            move.setScore(100);
+            continue;
+        }
+
         _board.makeMove(move);
         bool inCheck = _board.inCheck();
         _board.unmakeMove(move);

@@ -15,6 +15,7 @@ public:
         uint64_t zobrist{};
         int eval{};
         int depth{};
+        chess::Move bestMove{};
     };
 
     TTable(int size);

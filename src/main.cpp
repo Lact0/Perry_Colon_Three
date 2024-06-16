@@ -238,5 +238,5 @@ int main() {
         if(cmd[0] == "uci") runUCI();
         else if(cmd[0] == "selfgame") runGame(std::stoi(cmd[1]));
     }
-    
+
 }
