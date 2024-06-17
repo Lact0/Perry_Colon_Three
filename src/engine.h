@@ -14,6 +14,7 @@ public:
 
     struct SearchStatistics {
         int nodesSearched{0};
+        int quiescenceNodes{0};
         int time{0};
         int numCutoffs{0};
         int depthSearched{0};
@@ -155,7 +156,8 @@ private:
     //FUNCTIONS
     int staticEval();
     int negamax(int ply, int alpha, int beta);
-    void scoreMoves(chess::Movelist& moves);
+    int quiescence(int alpha, int beta);
+    void scoreMoves(chess::Movelist& moves, bool quiescent);
     void sortMoves(chess::Movelist& moves, int ind);
 
 };

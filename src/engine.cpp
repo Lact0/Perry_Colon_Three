@@ -129,7 +129,6 @@ void Engine::timerWorker(int mili) {
 int Engine::negamax(int ply, int alpha, int beta) {
 
     if(_stopSearching) return 0;
-    if(_collectStats) ++_stats.nodesSearched;
 
     //Check table for valid entry
     int oldAlpha = alpha;
@@ -151,6 +150,9 @@ int Engine::negamax(int ply, int alpha, int beta) {
         }
     }
 
+    if(ply == 0) return quiescence(alpha, beta);
+    if(_collectStats) ++_stats.nodesSearched;
+
     chess::Movelist moves{};
     chess::movegen::legalmoves(moves, _board);
 
@@ -158,12 +160,10 @@ int Engine::negamax(int ply, int alpha, int beta) {
     if(moves.empty() && !_board.inCheck()) return 0;
     if(_board.isRepetition(1)) return 0;
 
-    int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
-    if(ply == 0) return staticEval() * sideToMove;
     
     int bestEval{_nInf};
     chess::Move bestMove{};
-    scoreMoves(moves);
+    scoreMoves(moves, false);
 
     //Main loop
     for(int i = 0; i < moves.size(); i++) {
@@ -211,6 +211,47 @@ int Engine::negamax(int ply, int alpha, int beta) {
     return bestEval;
 }
 
+int Engine::quiescence(int alpha, int beta) {
+    
+    if(_collectStats) ++_stats.quiescenceNodes;
+
+    //Set lower bound
+    int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
+    int eval = staticEval() * sideToMove;
+    if(eval >= beta) return eval;
+    if(eval > alpha) alpha = eval;
+
+    //Generate Capture moves
+    chess::Movelist moves{};
+    chess::movegen::legalmoves<chess::movegen::MoveGenType::CAPTURE>(moves, _board);
+
+    //Setup for loop
+    scoreMoves(moves, true);
+
+    for(int i = 0; i < moves.size(); i++) {
+
+        if(_stopSearching) return alpha;
+
+        //Get ordered move
+        sortMoves(moves, i);
+        const chess::Move& move = moves[i]; 
+
+        //Search move
+        _board.makeMove(move);
+        int curEval = -quiescence(-beta, -alpha);
+        _board.unmakeMove(move);
+
+        //Update Evals
+        if(curEval > eval) eval = curEval;
+
+        //Prune
+        if(eval > alpha) alpha = eval;
+        if(alpha >= beta) break;
+    }
+
+    return eval;
+}
+
 int Engine::staticEval() {
     int eval{0};
 
@@ -248,19 +289,19 @@ void Engine::logStatsToFile() {
     logFile << "FEN:" << _board.getFen() << "\n";
     logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" << _eval << "\n";
     logFile << "\tTIME:" << duration << " DEPTH:" << _stats.depthSearched << "\n";
-    logFile << "\tNODES:" << _stats.nodesSearched << " CUTOFFS:" << _stats.numCutoffs << "\n";
-    logFile << "\tTABLE HITS:" << _stats.tableHits << "\n";
+    logFile << "\tNODES:" << _stats.nodesSearched << " QNODES:" << _stats.quiescenceNodes << "\n";
+    logFile << "\tTABLE HITS:" << _stats.tableHits << " CUTOFFS:" << _stats.numCutoffs << "\n";
 
     logFile << "\n";
     logFile.close();
 
 }
 
-void Engine::scoreMoves(chess::Movelist& moves) {
+void Engine::scoreMoves(chess::Movelist& moves, bool quiescent) {
 
     bool tableMoveExists = false;
     chess::Move tableMove;
-    if(_table.hasEntry(_board.hash())) {
+    if(!quiescent && _table.hasEntry(_board.hash())) {
         tableMove = _table.getEntry(_board.hash()).bestMove;
         tableMoveExists = true;
     }
@@ -271,13 +312,8 @@ void Engine::scoreMoves(chess::Movelist& moves) {
             move.setScore(100);
             continue;
         }
-
-        _board.makeMove(move);
-        bool inCheck = _board.inCheck();
-        _board.unmakeMove(move);
         
-        if(inCheck) move.setScore(50);
-        else if(_board.isCapture(move)) {
+        if(_board.isCapture(move)) {
             //Ranges from 20 to 30
             chess::PieceType attacker = _board.at<chess::PieceType>(move.from());
             chess::PieceType victim = _board.at<chess::PieceType>(move.to());
