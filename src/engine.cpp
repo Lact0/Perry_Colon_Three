@@ -1,5 +1,19 @@
 #include "engine.h"
 
+Engine::SearchStatistics Engine::getRuntimeStats() {
+
+    _runtimeStatsMutex.lock();
+    _runtimeStatsAvailable = false;
+    SearchStatistics ret = _runtimeStats;
+    _runtimeStatsMutex.unlock();
+
+    return ret;
+}
+
+void Engine::newGame() {
+    setBoard(chess::Board());
+}
+
 void Engine::setBoard(chess::Board board) {
     _board = board;
     _bestMove = chess::Move();
@@ -48,6 +62,7 @@ void Engine::think(int mili) {
 
     _stopSearching = false;
     _isSearching = true;
+    _runtimeStatsAvailable = false;
 
     _thinkThread = std::thread{&Engine::thinkWorker, this, 100};
     _timerThread = std::thread(&Engine::timerWorker, this, mili);
@@ -97,15 +112,21 @@ void Engine::thinkWorker(int maxPly) {
         //Handle for early exit
         if(_stopSearching) break;
 
-        _eval = bestEval;
-        _bestMove = bestMove;
-
+        _stats.eval = _eval = bestEval;
+        _stats.bestMove = _bestMove = bestMove;
         if(_collectStats) _stats.depthSearched = ply + 1;
 
+        //Update runtime Stats
+        _runtimeStatsMutex.lock();
+        _runtimeStatsAvailable = true;
+        _runtimeStats = _stats;
+        _runtimeStatsMutex.unlock();
     }
 
     //Bookmove trumps search
-    if(bookMoveExists) _bestMove = bookMoves[0];
+    if(bookMoveExists) {
+        _stats.bestMove = _bestMove = bookMoves[0];
+    }
 
     if(_collectStats) {
         time end = std::chrono::high_resolution_clock::now();

@@ -149,6 +149,16 @@ void runUCI() {
             isThinking = false;
         }
 
+        if(isThinking && engine.runtimeStatsAvailable()) {
+            Engine::SearchStatistics stats = engine.getRuntimeStats();
+            std::cout << "info"
+                << " depth " << stats.depthSearched
+                << " bestmove " + chess::uci::moveToUci(stats.bestMove)
+                << " score cp " << stats.eval
+                << " nodes " << stats.nodesSearched
+                << "\n" << std::flush;
+        }
+
         if(inputHandler.inputRecieved()) {
             inp = inputHandler.getInput();
             std::vector<std::string> cmd = splitString(inp);
@@ -158,7 +168,7 @@ void runUCI() {
             
             } else if(inp == "ucinewgame") {
             
-                engine.setBoard(chess::Board());
+                engine.newGame();
                 if(debugOn) std::cout << "DEBUG: New game set.\n" << std::flush;
             
             } else if(cmd[0] == "position") {

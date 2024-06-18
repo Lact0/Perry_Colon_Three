@@ -4,6 +4,7 @@
 #include <fstream>
 #include <atomic>
 #include <thread>
+#include <mutex>
 
 #include "chess.hpp"
 #include "polyglotReader.h"
@@ -19,6 +20,9 @@ public:
         int numCutoffs{0};
         int depthSearched{0};
         int tableHits{0};
+        
+        int eval{0};
+        chess::Move bestMove{};
     };
 
     //Constructors
@@ -33,9 +37,12 @@ public:
     const chess::Board& getBoard() {return _board;}
     const chess::Move& getBestMove() {return _bestMove;}
     const SearchStatistics& getSearchStats() {return _stats;}
+    SearchStatistics getRuntimeStats();
     bool isSearching() {return _isSearching;}
+    bool runtimeStatsAvailable() {return _runtimeStatsAvailable;}
 
     //Setters
+    void newGame();
     void setBoard(chess::Board board);
     void useOpeningBook(std::string_view fileName);
     void collectStats(bool collectStats) {_collectStats = collectStats;}
@@ -136,6 +143,8 @@ private:
     std::thread _timerThread{};
     std::atomic_bool _stopSearching{false};
     std::atomic_bool _isSearching{false};
+    std::atomic_bool _runtimeStatsAvailable{false};
+    std::mutex _runtimeStatsMutex{};
 
     void thinkWorker(int maxPly);
     void timerWorker(int mili);
@@ -143,8 +152,9 @@ private:
     //STATISTICS
     bool _collectStats{true};
     bool _logStats{false};
-    SearchStatistics _stats{};
     std::string _logFileName{};
+    SearchStatistics _stats{};
+    SearchStatistics _runtimeStats{};
     
     void logStatsToFile();
 
