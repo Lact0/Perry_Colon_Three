@@ -78,7 +78,7 @@ void runUCI() {
     std::cout << "id author Peter Perry\n";
     
     //TODO: GIVE AND RECIEVE OPTIONS
-    std::cout << "option name Hash type spin default 1 min 1 max 128\n";
+    std::cout << "option name Hash type spin default 1 min 1 max 256\n";
     std::cout << "option name ClearHash type button\n";
     std::cout << "uciok\n";
     
@@ -144,11 +144,6 @@ void runUCI() {
 
     while(true) {
 
-        if(isThinking && !engine.isSearching()) {
-            finishThinking(engine);
-            isThinking = false;
-        }
-
         if(isThinking && engine.runtimeStatsAvailable()) {
             Engine::SearchStatistics stats = engine.getRuntimeStats();
             std::cout << "info"
@@ -157,6 +152,11 @@ void runUCI() {
                 << " score cp " << stats.eval
                 << " nodes " << stats.nodesSearched
                 << "\n" << std::flush;
+        }
+
+        if(isThinking && !engine.isSearching()) {
+            finishThinking(engine);
+            isThinking = false;
         }
 
         if(inputHandler.inputRecieved()) {

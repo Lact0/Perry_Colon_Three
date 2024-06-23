@@ -121,6 +121,8 @@ void Engine::thinkWorker(int maxPly) {
         _runtimeStatsAvailable = true;
         _runtimeStats = _stats;
         _runtimeStatsMutex.unlock();
+
+        if(bestEval == _pInf || bestEval == _nInf) break;
     }
 
     //Bookmove trumps search
@@ -151,6 +153,10 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
     if(_stopSearching) return 0;
 
+    //Check for repetitions
+    if(_board.isRepetition(1)) return 0;
+    if(_board.isHalfMoveDraw()) return 0;
+
     //Check table for valid entry
     int oldAlpha = alpha;
     if(_table.hasEntry(_board.hash())) {
@@ -179,8 +185,6 @@ int Engine::negamax(int ply, int alpha, int beta) {
 
     if(moves.empty() && _board.inCheck()) return _nInf;
     if(moves.empty() && !_board.inCheck()) return 0;
-    if(_board.isRepetition(1)) return 0;
-
     
     int bestEval{_nInf};
     chess::Move bestMove{};
@@ -215,11 +219,6 @@ int Engine::negamax(int ply, int alpha, int beta) {
             _board.unmakeMove(move);
 
         }
-        
-
-        //Later positions are worth less
-        if(curEval > 0) --curEval;
-        if(curEval < 0) ++curEval;
 
         //Update Evals
         if(curEval > alpha) alpha = curEval;
