@@ -195,10 +195,27 @@ int Engine::negamax(int ply, int alpha, int beta) {
         sortMoves(moves, i);
         const chess::Move& move = moves[i]; 
         
-        //Get eval of move
-        _board.makeMove(move);
-        int curEval = -negamax(ply - 1, -beta, -alpha);
-        _board.unmakeMove(move);
+        int curEval;
+
+        //NEGASCOUT: FIRST MOVE
+        if(i == 0) {
+            //Get eval of move
+            _board.makeMove(move);
+            curEval = -negamax(ply - 1, -beta, -alpha);
+            _board.unmakeMove(move);
+        } else {
+
+            _board.makeMove(move);
+            curEval = -negamax(ply - 1, -alpha - 1, -alpha);
+
+            if(alpha < curEval && curEval < beta) {
+                curEval = -negamax(ply - 1, -beta, -alpha);
+            }
+
+            _board.unmakeMove(move);
+
+        }
+        
 
         //Later positions are worth less
         if(curEval > 0) --curEval;
