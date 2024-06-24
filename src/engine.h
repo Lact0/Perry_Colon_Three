@@ -22,6 +22,7 @@ public:
         int tableHits{0};
         
         int eval{0};
+        bool forcedMate{false};
         chess::Move bestMove{};
     };
 

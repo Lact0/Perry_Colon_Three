@@ -112,9 +112,18 @@ void Engine::thinkWorker(int maxPly) {
         //Handle for early exit
         if(_stopSearching) break;
 
+        bool forcedMate = bestEval == _pInf || bestEval == _nInf;
+
         _stats.eval = _eval = bestEval;
         _stats.bestMove = _bestMove = bestMove;
         if(_collectStats) _stats.depthSearched = ply + 1;
+        
+        //Update score to show mate in # moves
+        if(forcedMate) {
+            _stats.forcedMate = true;
+            _stats.eval = (ply + 1) / 2;
+            if(bestEval < 0) _stats.eval *= -1;
+        }
 
         //Update runtime Stats
         _runtimeStatsMutex.lock();
@@ -122,7 +131,7 @@ void Engine::thinkWorker(int maxPly) {
         _runtimeStats = _stats;
         _runtimeStatsMutex.unlock();
 
-        if(bestEval == _pInf || bestEval == _nInf) break;
+        if(forcedMate) break;
     }
 
     //Bookmove trumps search
@@ -324,7 +333,9 @@ void Engine::logStatsToFile() {
     std::string duration = std::to_string(_stats.time / 1000) + "." + decimal;
     
     logFile << "FEN:" << _board.getFen() << "\n";
-    logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" << _eval << "\n";
+    logFile << "\tMOVE:" << chess::uci::moveToSan(_board, _bestMove) <<  " EVAL:" ;
+    if(_stats.forcedMate) logFile << "M";
+    logFile << _stats.eval << "\n";
     logFile << "\tTIME:" << duration << " DEPTH:" << _stats.depthSearched << "\n";
     logFile << "\tNODES:" << _stats.nodesSearched << " QNODES:" << _stats.quiescenceNodes << "\n";
     logFile << "\tTABLE HITS:" << _stats.tableHits << " CUTOFFS:" << _stats.numCutoffs << "\n";

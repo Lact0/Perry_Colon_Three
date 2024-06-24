@@ -148,9 +148,14 @@ void runUCI() {
             Engine::SearchStatistics stats = engine.getRuntimeStats();
             std::cout << "info"
                 << " depth " << stats.depthSearched
-                << " bestmove " + chess::uci::moveToUci(stats.bestMove)
-                << " score cp " << stats.eval
-                << " nodes " << stats.nodesSearched
+                << " bestmove " + chess::uci::moveToUci(stats.bestMove);
+            
+            if(stats.forcedMate) {
+                std::cout << " score mate " << stats.eval;
+            } else {
+                std::cout << " score cp " << stats.eval;
+            }
+            std::cout << " nodes " << stats.nodesSearched
                 << "\n" << std::flush;
         }
 
