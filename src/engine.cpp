@@ -90,6 +90,7 @@ void Engine::thinkWorker(int maxPly) {
 
     //Iterative Deepening
     for(int ply{0}; ply < maxPly; ++ply) {
+        if(bookMoveExists) break;
 
         //Best eval must be worse than checkmate
         int bestEval{_nInf - 1};

@@ -76,10 +76,17 @@ void runUCI() {
     //Send init info
     std::cout << "id name Perry Colon Three\n";
     std::cout << "id author Peter Perry\n";
-    
-    //TODO: GIVE AND RECIEVE OPTIONS
+
+    //Check if Titans.bin exists
+    bool titansExists = false;
+    std::ifstream file;
+    file.open("./Titans.bin");
+    if(file) titansExists = true; 
+
+    //Send option info
     std::cout << "option name Hash type spin default 1 min 1 max 256\n";
     std::cout << "option name ClearHash type button\n";
+    if(titansExists) std::cout << "option name OwnBook type check default false\n";
     std::cout << "uciok\n";
     
     //Option settings
@@ -115,6 +122,15 @@ void runUCI() {
         if(cmd[0] == "setoption") {
             if(cmd[2] == "Hash") {
                 tableSize = std::stoi(cmd[4]);
+            }
+
+            if(cmd[2] == "OwnBook" && titansExists) {
+                if(cmd[4] == "true") {
+                    useOutsideOpeningBook = true;
+                    bookFileName = "./Titans.bin";
+                } else {
+                    useOutsideOpeningBook = false;
+                }
             }
         }
 
