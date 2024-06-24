@@ -125,12 +125,8 @@ void runUCI() {
             }
 
             if(cmd[2] == "OwnBook" && titansExists) {
-                if(cmd[4] == "true") {
-                    useOutsideOpeningBook = true;
-                    bookFileName = "./Titans.bin";
-                } else {
-                    useOutsideOpeningBook = false;
-                }
+                useOutsideOpeningBook = true;
+                bookFileName = "./Titans.bin";
             }
         }
 
