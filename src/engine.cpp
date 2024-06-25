@@ -17,7 +17,7 @@ void Engine::newGame() {
 void Engine::setBoard(chess::Board board) {
     _board = board;
     _bestMove = chess::Move();
-    _eval = staticEval();
+    _eval = Evaluation::staticEval(board);
 }
 
 void Engine::useOpeningBook(std::string_view fileName) {
@@ -40,7 +40,7 @@ void Engine::logStats(std::string_view logFileName) {
 void Engine::makeMove(const chess::Move& move) {
     _board.makeMove(move);
     _bestMove = chess::Move();
-    _eval = staticEval();
+    _eval = Evaluation::staticEval(_board);
 }
 
 void Engine::thinkToPly(int maxPly) {
@@ -264,7 +264,7 @@ int Engine::quiescence(int alpha, int beta) {
 
     //Set lower bound
     int sideToMove{_board.sideToMove() == chess::Color::WHITE ? 1 : -1};
-    int eval = staticEval() * sideToMove;
+    int eval = Evaluation::staticEval(_board) * sideToMove;
     if(eval >= beta) return eval;
     if(eval > alpha) alpha = eval;
 
@@ -294,33 +294,6 @@ int Engine::quiescence(int alpha, int beta) {
         //Prune
         if(eval > alpha) alpha = eval;
         if(alpha >= beta) break;
-    }
-
-    return eval;
-}
-
-int Engine::staticEval() {
-    int eval{0};
-
-    chess::PieceType piecesToScore[5] {
-        chess::PieceType::PAWN,
-        chess::PieceType::ROOK,
-        chess::PieceType::KNIGHT,
-        chess::PieceType::BISHOP,
-        chess::PieceType::QUEEN
-    };
-
-    for(chess::PieceType piece: piecesToScore) {
-        chess::Bitboard whitePieces = _board.pieces(piece, chess::Color::WHITE);
-        chess::Bitboard blackPieces = _board.pieces(piece, chess::Color::BLACK);
-        int pieceValue{_pieceValues[static_cast<int>(piece)]};
-        
-        while(!whitePieces.empty()) {
-            eval += pieceValue + _pieceSquareTable[piece][whitePieces.pop()];
-        }
-        while(!blackPieces.empty()) {
-            eval -= pieceValue + _pieceSquareTable[piece][63 - blackPieces.pop()];
-        }
     }
 
     return eval;
