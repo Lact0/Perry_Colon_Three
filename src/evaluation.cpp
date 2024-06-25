@@ -49,6 +49,23 @@ int Evaluation::mgPawns(chess::Board& board) {
 
     eval += pawnConnected(board);
 
+    //Collect penalties for pawns
+    const chess::Bitboard wPawnFull = board.pieces(chess::PieceType::PAWN, chess::Color::WHITE);
+    const chess::Bitboard bPawnFull = board.pieces(chess::PieceType::PAWN, chess::Color::BLACK);
+    chess::Bitboard wPawnIter = wPawnFull;
+    chess::Bitboard bPawnIter = bPawnFull;
+
+    while(!wPawnIter.empty()) {
+        int ind = wPawnIter.pop();
+        if(pawnIsolated(wPawnFull, ind)) eval -= _isolatedPawnPenalty;
+        if(pawnDoubled(wPawnFull, ind))  eval -= _doubledPawnPenalty;
+    }
+    while(!bPawnIter.empty()) {
+        int ind = bPawnIter.pop();
+        if(pawnIsolated(bPawnFull, ind)) eval += _isolatedPawnPenalty;
+        if(pawnDoubled(bPawnFull, ind))  eval += _doubledPawnPenalty;
+    }
+
     return eval;
 }
 
@@ -186,4 +203,26 @@ int Evaluation::bPawnOpposed(chess::Board& board, int index) {
 
     //Checks for overlap in mask
     return !((opposedMask & enemyPawns).empty());
+}
+
+int Evaluation::pawnIsolated(const chess::Bitboard& pawns, int index) {
+
+    chess::Bitboard sideFileMask = chess::Bitboard();
+
+    //Add left if pawn is not on left edge
+    if(index % 8 > 0) {
+        sideFileMask &= chess::Bitboard(chess::Rank((index % 8) - 1));
+    }
+
+    //Add right if pawn is not on the right edge
+    if(index % 8 < 7) {
+        sideFileMask &= chess::Bitboard(chess::Rank((index % 8) + 1));
+    }
+
+    return !(sideFileMask & pawns).count();
+}
+
+int Evaluation::pawnDoubled(const chess::Bitboard& pawns, int index) {
+    if(index < 8 || index > 55) return 0;
+    return pawns.check(index - 8) || pawns.check(index + 8);
 }

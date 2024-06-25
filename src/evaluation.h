@@ -10,7 +10,7 @@ public:
 
 private:
 
-    //Sub eval functions
+    //Middle game sub eval functions
     static int mgPieceValue(chess::Board& board);
     static int mgPieceTable(chess::Board& board);
     static int mgPawns(chess::Board& board);
@@ -23,6 +23,9 @@ private:
     static int bPawnPhalanx(const chess::Bitboard& pawns, int index);
     static int wPawnOpposed(chess::Board& board, int index);
     static int bPawnOpposed(chess::Board& board, int index);
+
+    static int pawnIsolated(const chess::Bitboard& pawns, int index);
+    static int pawnDoubled(const chess::Bitboard& pawns, int index);
 
     
     //Constants
@@ -104,5 +107,7 @@ private:
     //Pawn Parameters
     static constexpr int _pawnSupporterbonus = 21;
     static constexpr int _pawnConnectedSeed[7] = {0, 7, 8, 12, 29, 48, 86};
+    static constexpr int _isolatedPawnPenalty = 5;
+    static constexpr int _doubledPawnPenalty = 11;
 
 };
