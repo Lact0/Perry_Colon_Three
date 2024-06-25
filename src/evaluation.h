@@ -10,9 +10,20 @@ public:
 
 private:
 
-    //Helper functions
+    //Sub eval functions
     static int mgPieceValue(chess::Board& board);
     static int mgPieceTable(chess::Board& board);
+    static int mgPawns(chess::Board& board);
+
+    //Pawn helper functions
+    static int pawnConnected(chess::Board& board);
+    static int wPawnSupport(const chess::Bitboard& pawns, int index);
+    static int bPawnSupport(const chess::Bitboard& pawns, int index);
+    static int wPawnPhalanx(const chess::Bitboard& pawns, int index);
+    static int bPawnPhalanx(const chess::Bitboard& pawns, int index);
+    static int wPawnOpposed(chess::Board& board, int index);
+    static int bPawnOpposed(chess::Board& board, int index);
+
     
     //Constants
     static constexpr chess::PieceType _pieces[5] {
@@ -89,5 +100,9 @@ private:
         }
 
     };
+    
+    //Pawn Parameters
+    static constexpr int _pawnSupporterbonus = 21;
+    static constexpr int _pawnConnectedSeed[7] = {0, 7, 8, 12, 29, 48, 86};
 
 };
