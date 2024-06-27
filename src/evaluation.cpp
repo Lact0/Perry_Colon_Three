@@ -7,6 +7,7 @@ int Evaluation::staticEval(chess::Board& board) {
     eval += mgPieceValue(board);
     eval += mgPieceTable(board);
     eval += mgPawns(board);
+    eval += mgMobility(board);
 
     return eval;
 }
@@ -225,4 +226,23 @@ int Evaluation::pawnIsolated(const chess::Bitboard& pawns, int index) {
 int Evaluation::pawnDoubled(const chess::Bitboard& pawns, int index) {
     if(index < 8 || index > 55) return 0;
     return pawns.check(index - 8) || pawns.check(index + 8);
+}
+
+int Evaluation::mgMobility(chess::Board& board) {
+    
+    //Gen moves
+    chess::Movelist whiteMoves, blackMoves;
+    if(board.sideToMove() == chess::Color::WHITE) {
+        chess::movegen::legalmoves(whiteMoves, board);
+        board.makeNullMove();
+        chess::movegen::legalmoves(blackMoves, board);
+        board.unmakeNullMove();
+    } else {
+        chess::movegen::legalmoves(blackMoves, board);
+        board.makeNullMove();
+        chess::movegen::legalmoves(whiteMoves, board);
+        board.unmakeNullMove();
+    }
+
+    return _mobilityBonus * (whiteMoves.size() - blackMoves.size());
 }

@@ -14,6 +14,7 @@ private:
     static int mgPieceValue(chess::Board& board);
     static int mgPieceTable(chess::Board& board);
     static int mgPawns(chess::Board& board);
+    static int mgMobility(chess::Board& board);
 
     //Pawn helper functions
     static int pawnConnected(chess::Board& board);
@@ -103,7 +104,8 @@ private:
         }
 
     };
-    
+    static constexpr int _mobilityBonus = 10;
+
     //Pawn Parameters
     static constexpr int _pawnSupporterbonus = 21;
     static constexpr int _pawnConnectedSeed[7] = {0, 7, 8, 12, 29, 48, 86};
