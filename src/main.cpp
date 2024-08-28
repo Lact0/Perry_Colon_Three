@@ -49,8 +49,13 @@ chess::Board parsePositionCmd(std::vector<std::string>& movelist) {
         newBoard = chess::Board();
     } else {
         std::string fen = movelist[1];
+        int i = 2;
+        if(fen == "fen") {
+            fen = movelist[2];
+            ++i;
+        }
 
-        for(int i = 2; i < moveIndex; i++) {
+        for(; i < moveIndex; i++) {
             fen += " " + movelist[i];
         }
 
@@ -222,7 +227,12 @@ void runUCI() {
                 finishThinking(engine);
                 isThinking = false;
                 if(debugOn) std::cout << "DEBUG: Engine has stopped thinking.\n" << std::flush;
+            } else if(cmd[0] == "quit") {
+                engine.finishSearching();
+                return;
             }
+
+            inputHandler.start();
 
         }
     }
@@ -262,8 +272,13 @@ int main() {
 
         std::vector<std::string> cmd = splitString(inp);
 
-        if(cmd[0] == "uci") runUCI();
-        else if(cmd[0] == "selfgame") runGame(std::stoi(cmd[1]));
+        if(cmd[0] == "uci") {
+            runUCI();
+            break;
+        } else if(cmd[0] == "selfgame") {
+            runGame(std::stoi(cmd[1]));
+            break;
+        }
     }
 
 }

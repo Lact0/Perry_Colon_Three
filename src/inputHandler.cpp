@@ -18,7 +18,6 @@ std::string InputHandler::getInput() {
     _mutex.unlock();
 
     join();
-    start();
     return input;
 }
 

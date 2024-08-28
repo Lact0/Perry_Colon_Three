@@ -6,8 +6,8 @@ int Evaluation::staticEval(chess::Board& board) {
 
     eval += mgPieceValue(board);
     eval += mgPieceTable(board);
-    eval += mgPawns(board);
-    eval += mgMobility(board);
+    // eval += mgPawns(board);
+    // eval += mgMobility(board);
 
     return eval;
 }
