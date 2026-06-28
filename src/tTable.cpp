@@ -2,7 +2,7 @@
 
 TTable::TTable(int size) {
     _size = size;
-    _numEntries = size * 1000000 / sizeof(TTable::Entry);
+    _numEntries = (long) size * 1000000 / sizeof(TTable::Entry);
     _table = new TTable::Entry[_numEntries];
 }
 
@@ -28,7 +28,7 @@ void TTable::storeEntry(TTable::Entry entry) {
 
 void TTable::resize(int size) {
     _size = size;
-    _numEntries = size * 1000000 / sizeof(TTable::Entry);
+    _numEntries = (long) size * 1000000 / sizeof(TTable::Entry);
     delete[] _table;
     _table = new TTable::Entry[_numEntries];
 }

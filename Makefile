@@ -8,7 +8,7 @@ all: main.exe
 debug: FLG += -g -ggdb
 debug: clean main.exe reclean
 
-release: FLG += -O2 -DNDEBUG 
+release: FLG += -O3 -DNDEBUG 
 release: clean main.exe reclean
 
 main.exe: ${DOTO}

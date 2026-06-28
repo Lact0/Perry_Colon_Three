@@ -32,7 +32,7 @@ public:
 private:
 
     Entry* _table{};
-    int _numEntries{0};
+    long _numEntries{0};
     int _size{0};
     
 };
