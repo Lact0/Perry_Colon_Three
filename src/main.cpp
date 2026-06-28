@@ -230,6 +230,8 @@ void runUCI() {
             } else if(cmd[0] == "quit") {
                 engine.finishSearching();
                 return;
+            } else if(cmd[0] == "isready") {
+                std::cout << "readyok\n" << std::flush;
             }
 
             inputHandler.start();
