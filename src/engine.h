@@ -16,6 +16,7 @@ public:
 
     struct SearchStatistics {
         int nodesSearched{0};
+        int nodesPerSecond{0};
         int quiescenceNodes{0};
         int time{0};
         int numCutoffs{0};

@@ -117,7 +117,14 @@ void Engine::thinkWorker(int maxPly) {
 
         _stats.eval = _eval = bestEval;
         _stats.bestMove = _bestMove = bestMove;
-        if(_collectStats) _stats.depthSearched = ply + 1;
+        if(_collectStats) {
+            _stats.depthSearched = ply + 1;
+
+            time curTime = std::chrono::high_resolution_clock::now();
+            int delta = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - start).count();
+            if (delta == 0) _stats.nodesPerSecond = -1;
+            else _stats.nodesPerSecond = ((float) _stats.nodesSearched / delta) * 1000;
+        }
         
         //Update score to show mate in # moves
         if(forcedMate) {

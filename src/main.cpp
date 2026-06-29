@@ -89,7 +89,7 @@ void runUCI() {
     if(file) titansExists = true; 
 
     //Send option info
-    std::cout << "option name Hash type spin default 1 min 1 max 4096\n";
+    std::cout << "option name Hash type spin default 1 min 1 max 16384\n";
     std::cout << "option name ClearHash type button\n";
     if(titansExists) std::cout << "option name OwnBook type check default false\n";
     std::cout << "uciok\n";
@@ -173,6 +173,7 @@ void runUCI() {
                 std::cout << " score cp " << stats.eval;
             }
             std::cout << " nodes " << stats.nodesSearched
+                << " nps " << stats.nodesPerSecond 
                 << "\n" << std::flush;
         }
 
