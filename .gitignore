@@ -2,5 +2,6 @@
 .vscode/
 *.exe
 main.exe
-engines
-games
+engines/
+games/
+old/
