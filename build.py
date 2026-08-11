@@ -109,11 +109,27 @@ def get_target_name(target):
     name = get_clean_target_name(target)
     return f'\033[38;5;{get_color(name)}m{name}\033[0m'
 
-# Build Project
+# Setup project 
 # -------------------------
 create_directory(build_dir + '/obj')
 create_directory(build_dir + '/bin')
 
+create_directory(src_dir + '/apps')
+create_directory(include_dir)
+
+if not os.path.exists("compile_flags.txt"):
+    with open("compile_flags.txt", "w") as file:
+        file.write("-Iinclude")
+
+if not os.path.exists(".gitignore"):
+    with open(".gitignore", "w") as file:
+        file.write(".vscode/")
+        file.write("build/")
+        file.write("compile_flags.txt")
+
+
+# Build Project
+# -------------------------
 
 # Figure out which main is the target
 targets = []
